@@ -1,11 +1,89 @@
 ## 🎐WeiBo_SuperTopics
 
 > 使用教程日后有时间更新，接口写了一点，可自行扩展功能
->
+
+
+
+### 🌍功能简介
+
+- 关注超话签到
+- 每日积分获取
+- 超话打榜
+- 微信推送消息
+
+
+
+### 🚀运作流程
+
+##### 1、Secrets
+
+```
+设置如下secrets字段:
+COOKIE		通过登录https://m.weibo.cn/获取cookie
+S			通过抓包微博国际版APP签到请求获取
+PICK		设置自己打榜的超话名字,例如：喻言
+SCKEY		通过https://sc.ftqq.com/3.version获取
+```
+
+##### 2、Schedule
+
+```
+由于害怕未知情况下的微博api请求异常，因此设置早上6点和晚上10点中进行两次任务
+schedule:
+	- cron: 0 14,22 * * *
+五位数(空格分隔)分别为分钟、小时、天、月、一个星期的第几天
+国际时与北京时的查询网站：http://www.timebie.com/cn/universalbeijing.php
+```
+
+##### 3、DailyTask
+
+```python
+# 有能力可以自定义自己的每日任务(加入评论转发点赞等)
+# self.log.append()是为了微信推送看上去更干净
+
+def daily_task(self, cookie, s, pick_name, sckey):
+    self.set_cookie(cookies=cookie)
+    ch_list = self.get_ch_list()
+    print("获取个人信息")
+    self.log.append("### 💫‍User：")
+    self.log.append("```")
+    self.get_profile()
+    self.log.append("```")
+    print("开始超话签到")
+    self.log.append("### ✨CheckIn：")
+    self.log.append("```")
+    for i in ch_list:
+        time.sleep(self.seconds)
+        self.check_in(s, i)
+    self.log.append("```")
+    print("获取每日积分")
+    self.log.append("### 🔰DailyScore：")
+    self.log.append("```")
+    self.get_day_score()
+    self.log.append("```")
+    print("开始打榜")
+    self.log.append("### 💓Pick：")
+    self.log.append("```")
+    self.get_score_bang([i for i in ch_list if i["title"] == pick_name][0])
+    self.log.append("```")
+    self.server_push(sckey)
+```
+
+
+
+### 🚧使用帮助
+
+> 复杂的食用方式待更新
+
+
 
 ### 🏍更新记录
 
+##### 💤2020/08/28：增加打榜计划，优化微信推送格式
+
 ##### 🌈2020/08/27：第一次提交
+
+
 
 ### ♻致谢
 

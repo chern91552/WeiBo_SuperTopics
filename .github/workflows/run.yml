@@ -29,6 +29,7 @@ jobs:
         python3 check.py <<EOF
         ${{secrets.COOKIE}}
         ${{secrets.S}}
+        ${{secrets.PICK}}
         ${{secrets.SCKEY}}
         EOF
         

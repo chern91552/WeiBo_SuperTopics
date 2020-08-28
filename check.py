@@ -1,8 +1,3 @@
-"""
-@Title: 微博API
-@Author: ReaJason
-@CreateDate: 2020-08-04
-"""
 import time
 import datetime
 import json
@@ -62,7 +57,13 @@ class WeiBo:
             "profile_url": user["profile_url"],
             "all_container_id": profile_response.json()["data"]["more"].split("/")[-1]
         }
-        self.log.append(user["screen_name"])
+        self.log.append(f"""ID: {user["id"]}
+NAME: {user["screen_name"]}
+简介: {user["description"] if user["description"] else "这个人很懒，什么也没有"}
+微博数: {user["statuses_count"]}
+关注数: {user["follow_count"]}
+粉丝数: {user["followers_count"]}
+        """)
         print(f"User:{user['screen_name']}")
         return user_dict
 
@@ -152,13 +153,15 @@ class WeiBo:
         )
         errmsg = check_res.json().get('errmsg')
         if errmsg:
-            msg = f'Title:{ch_dict["title"]}\ns参数设置有误'
+            msg = f'TopicName：{ch_dict["title"]}  s参数设置有误'
             print(msg)
             self.log.append(msg)
             return msg
 
         else:
-            msg = f'Title:{ch_dict["title"]}\n{check_res.json()["msg"]}'
+            c_msg = check_res.json()["msg"].replace("\n", "/")
+            msg = f'TopicName：{ch_dict["title"]}--{ch_dict["level"][-4:]}\n' \
+                  f'Message：{c_msg}'
             print(msg)
             self.log.append(msg)
             return msg
@@ -212,38 +215,45 @@ class WeiBo:
             "X-Requested-With": "XMLHttpRequest"
         }
         score_res = requests.get(referer_url, headers=get_score_headers)
-        if score_res.json()["code"] == 100000:
-            if score_res.json()["data"]["user_total_score"] > 100:
-                while True:
-                    pick_data = {
-                        "topic_name": ch_dict["title"],
-                        "page_id": "100808caf7e68f163e2d2e7d2c6a376095cf77",
-                        "score": score_res.json()["data"]["user_total_score"],
-                        "is_pub": "0",
-                        "cur_rank": score_res.json()["data"]["rank"],
-                        "ctg_id": score_res.json()["data"]["ctg_id"],
-                        "topic_score": score_res.json()["data"]["score"],
-                        "index": "select256",
-                        "user_score": score_res.json()["data"]["user_total_score"],
-                        "aid": "",
-                        "device": '{"timezone":"Asia/Shanghai","lang":"zh","plat":"Win32",'
-                                  '"ua":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
-                                  ' Chrome/84.0.4147.105 Safari/537.36","screen":"864*1536","aid":"","from":"1110006030"}',
-                        "param": score_res.json()["data"]["encryption_param"]
-                    }
-                    pick_res = requests.post(self.pick_url, headers=get_score_headers, data=pick_data)
-                    if pick_res.json()["code"] == 402001:
-                        continue
-                    else:
-                        msg = f"{pick_res.json()['data']['add_int_msg']}"
-                        self.log.append(msg)
-                        print(msg)
-                        return msg
-            else:
-                msg = f'当前积分：{score_res.json()["data"]["user_total_score"]}, 积分少于100，不打榜'
-                self.log.append(msg)
-                print(msg)
-                return msg
+        topic_name = score_res.json()["data"]["topic_name"]
+        score = score_res.json()["data"]["score"]
+        rank = score_res.json()["data"]["rank"]
+        # print(score_res.json())
+        if score_res.json()["data"]["user_total_score"] > 100:
+            while True:
+                pick_data = {
+                    "topic_name": ch_dict["title"],
+                    "page_id": ch_dict["id"],
+                    "score": score_res.json()["data"]["user_total_score"],
+                    "is_pub": "0",
+                    "cur_rank": score_res.json()["data"]["rank"],
+                    "ctg_id": score_res.json()["data"]["ctg_id"],
+                    "topic_score": score_res.json()["data"]["score"],
+                    "index": "select256",
+                    "user_score": score_res.json()["data"]["user_total_score"],
+                    "aid": "",
+                    "device": '{"timezone":"Asia/Shanghai","lang":"zh","plat":"Win32",'
+                              '"ua":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
+                              ' Chrome/84.0.4147.105 Safari/537.36","screen":"864*1536","aid":"","from":"1110006030"}',
+                    "param": score_res.json()["data"]["encryption_param"]
+                }
+                pick_res = requests.post(self.pick_url, headers=get_score_headers, data=pick_data)
+                if pick_res.json()["code"] == 402001:
+                    continue
+                elif pick_res.json()["code"] == 302001:
+                    print(pick_res.json()["msg"])
+                    return pick_res.json()["msg"]
+                else:
+                    msg = f"TopicName：{topic_name}\nRank：{rank}/{score}分\nMsg：{pick_res.json()['data']['add_int_msg']}"
+                    self.log.append(msg)
+                    print(msg)
+                    return msg
+        else:
+            msg = f'TopicName：{topic_name}\nRank：{rank}/{score}分\n' \
+                  f'Message：当前积分为{score_res.json()["data"]["user_total_score"]}, 积分少于100，暂不打榜'
+            self.log.append(msg)
+            print(msg)
+            return msg
 
     def get_st(self):
         """
@@ -364,18 +374,15 @@ class WeiBo:
         text = f"微博超话打卡---{bj_time.strftime('%H:%M:%S')}"
         desp = f"""
 ------
-### 现在时间：
+### 🚁Now：
 ```
 {bj_time.strftime("%Y-%m-%d %H:%M:%S %p")}
 ```
-### 打卡信息：
-```
 {self.get_log()}
-```
 
-### ⚡考研倒计时:
+### 🚀Deadline:
 ```
-{date}天
+考研倒计时--{date}天
 ```
 
 >
@@ -401,27 +408,49 @@ class WeiBo:
         """
         return "\n".join(self.log)
 
-    # 每日签到+积分获取
-    def daily_task(self, cookie, s, sckey):
-
+    # 每超话签到+每日积分获取+超话打榜
+    def daily_task(self, cookie, s, pick_name, sckey):
         self.set_cookie(cookies=cookie)
-        self.log.append("{:=^22}".format("User"))
-        self.get_profile()
-        print("获取每日积分")
-        self.log.append("{:=^22}".format("DailyScore"))
-        self.get_day_score()
         ch_list = self.get_ch_list()
+        print("获取个人信息")
+        self.log.append("### 💫‍User：")
+        self.log.append("```")
+        self.get_profile()
+        self.log.append("```")
         print("开始超话签到")
-        self.log.append("{:=^22}".format("CheckIn"))
+        self.log.append("### ✨CheckIn：")
+        self.log.append("```")
         for i in ch_list:
             time.sleep(self.seconds)
             self.check_in(s, i)
+        self.log.append("```")
+        print("获取每日积分")
+        self.log.append("### 🔰DailyScore：")
+        self.log.append("```")
+        self.get_day_score()
+        self.log.append("```")
+        print("开始打榜")
+        self.log.append("### 💓Pick：")
+        self.log.append("```")
+        self.get_score_bang([i for i in ch_list if i["title"] == pick_name][0])
+        self.log.append("```")
         self.server_push(sckey)
 
 
+def test():
+    cookie = "******"
+    s = "******"
+    pick = "喻言"
+    sckey = "*******"
+    check = WeiBo()
+    check.daily_task(cookie=cookie, s=s, sckey=sckey, pick_name=pick)
+
+
 if __name__ == '__main__':
+    # test()
     cookie = input()
     s = input()
+    pick = input()
     sckey = input()
     check = WeiBo()
-    check.daily_task(cookie=cookie, s=s, sckey=sckey)
+    check.daily_task(cookie=cookie, s=s, pick_name=pick, sckey=sckey)
