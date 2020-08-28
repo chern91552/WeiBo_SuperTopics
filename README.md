@@ -17,8 +17,9 @@
 
 ##### 1、Secrets
 
-```
-设置如下secrets字段:
+```python
+# 设置如下secrets字段:
+
 COOKIE		通过登录https://m.weibo.cn/获取cookie
 S			通过抓包微博国际版APP签到请求获取
 PICK		设置自己打榜的超话名字,例如：喻言
@@ -27,12 +28,13 @@ SCKEY		通过https://sc.ftqq.com/3.version获取
 
 ##### 2、Schedule
 
-```
-由于害怕未知情况下的微博api请求异常，因此设置早上6点和晚上10点中进行两次任务
+```python
+# 由于害怕未知情况下的微博api请求异常，因此设置早上6点和晚上10点中进行两次任务
+# 五位数(空格分隔)分别为分钟、小时、天、月、一个星期的第几天
+# 国际时与北京时的查询网站：http://www.timebie.com/cn/universalbeijing.php
+
 schedule:
 	- cron: 0 14,22 * * *
-五位数(空格分隔)分别为分钟、小时、天、月、一个星期的第几天
-国际时与北京时的查询网站：http://www.timebie.com/cn/universalbeijing.php
 ```
 
 ##### 3、DailyTask
