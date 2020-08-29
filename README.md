@@ -1,6 +1,8 @@
 ## 🎐WeiBo_SuperTopics
 
 > 使用教程日后有时间更新，接口写了一点，可自行扩展功能
+>
+> 欢迎star✨，有问题可以提issue一起学习交流
 
 
 
@@ -9,6 +11,8 @@
 - 关注超话签到
 - 每日积分获取
 - 超话打榜
+- 喻言超话帖子评论转发点赞
+- 任务中心查询积分
 - 微信推送消息
 
 
@@ -20,10 +24,10 @@
 ```python
 # 设置如下secrets字段:
 
-COOKIE		通过登录https://m.weibo.cn/获取cookie
-S			通过抓包微博国际版APP签到请求获取
-PICK		设置自己打榜的超话名字,例如：喻言
-SCKEY		通过https://sc.ftqq.com/3.version获取
+COOKIE  # 通过登录https://m.weibo.cn/获取cookie
+S  # 通过抓包微博国际版APP签到请求获取
+PICK  # 设置自己打榜的超话名字,例如：喻言
+SCKEY  # 通过https://sc.ftqq.com/3.version获取
 ```
 
 ##### 2、Schedule
@@ -42,31 +46,42 @@ schedule:
 ```python
 # 有能力可以自定义自己的每日任务(加入评论转发点赞等)
 # self.log.append()是为了微信推送看上去更干净
+# 每日超话签到+每日积分获取+超话打榜+喻言超话评论+任务中心
 
 def daily_task(self, cookie, s, pick_name, sckey):
     self.set_cookie(cookies=cookie)
     ch_list = self.get_ch_list()
     print("获取个人信息")
-    self.log.append("### 💫‍User：")
+    self.log.append("#### 💫‍User：")
     self.log.append("```")
     self.get_profile()
     self.log.append("```")
     print("开始超话签到")
-    self.log.append("### ✨CheckIn：")
+    self.log.append("#### ✨CheckIn：")
     self.log.append("```")
     for i in ch_list:
         time.sleep(self.seconds)
         self.check_in(s, i)
     self.log.append("```")
     print("获取每日积分")
-    self.log.append("### 🔰DailyScore：")
+    self.log.append("#### 🔰DailyScore：")
     self.log.append("```")
     self.get_day_score()
     self.log.append("```")
     print("开始打榜")
-    self.log.append("### 💓Pick：")
+    self.log.append("#### 💓Pick：")
     self.log.append("```")
-    self.get_score_bang([i for i in ch_list if i["title"] == pick_name][0])
+    self.get_score_bang([i for i in ch_list if i["title"] == pick_name])
+    self.log.append("```")
+    print("喻言超话开始评论~~")
+    self.log.append("#### ✅Post：")
+    self.log.append("```")
+    self.yu_yan([i["url"] for i in ch_list if i["title"] == "喻言"])
+    self.log.append("```")
+    print("查询任务中心")
+    self.log.append("#### 🌈TaskCenter：")
+    self.log.append("```")
+    self.task_center()
     self.log.append("```")
     self.server_push(sckey)
 ```
@@ -81,9 +96,11 @@ def daily_task(self, cookie, s, pick_name, sckey):
 
 ### 🏍更新记录
 
-##### 💤2020/08/28：增加打榜计划，优化微信推送格式
+**🎉2020/08/29：增加喻言超话评论，增加任务中心积分显示**
 
-##### 🌈2020/08/27：第一次提交
+**💤2020/08/28：增加打榜计划，优化微信推送格式**
+
+**🌈2020/08/27：第一次提交**
 
 
 
