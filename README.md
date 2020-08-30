@@ -122,7 +122,7 @@ def daily_task(self, cookie, s, pick_name, sckey):
 
 ### 🚁成果图
 
-![](https://cdn.jsdelivr.net/gh/ReaJason/WeiBo_SuperTopics/Pictures/result.jpg)
+<img src="https://cdn.jsdelivr.net/gh/ReaJason/WeiBo_SuperTopics/Pictures/result.jpg" width = "500" div align=center />
 
 
 
