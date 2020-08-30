@@ -90,9 +90,6 @@ class WeiBo:
                         "url": ch["scheme"],
                         "id": re.findall('[0-9a-z]{38}', ch["scheme"])[0]
                     }
-                    msg = '标题：{}，等级：{}级，签到状态：{}'.format(ch_dict["title"], ch_dict["level"], ch_dict["status"])
-                    print(msg)
-                    # self.log.append(msg)
                     # msg = '标题：{}，等级：{}级，签到状态：{}'.format(ch_dict["title"], ch_dict["level"], ch_dict["status"])
                     # print(msg)
                     ch_list.append(ch_dict)
@@ -159,7 +156,6 @@ class WeiBo:
         errmsg = check_res.json().get('errmsg')
         if errmsg:
             msg = f'TopicName：{ch_dict["title"]}  s参数设置有误'
-            print(msg)
             # print(msg)
             self.log.append(msg)
             return msg
@@ -167,7 +163,6 @@ class WeiBo:
         else:
             c_msg = check_res.json()["msg"].replace("\n", "/")
             msg = f'TopicName：{ch_dict["title"]}\nLevel：{ch_dict["level"]}\nMessage：{c_msg}'
-            print(msg)
             # print(msg)
             self.log.append(msg)
             return msg
@@ -193,18 +188,15 @@ class WeiBo:
         )
         if day_score_res.json()["code"] == 100000:
             msg = f'今日签到积分获取：{day_score_res.json()["data"]["add_score"]}分'
-            print(msg)
             # print(msg)
             self.log.append(msg)
             return msg
         elif day_score_res.json()["code"] == 386011:
             msg = f'{day_score_res.json()["msg"]}'
-            print(msg)
             self.log.append(msg)
             return msg
         elif day_score_res.json()["code"] == 100002:
             msg = f'{day_score_res.json()["msg"]}'
-            print(msg)
             self.log.append(msg)
             return msg
 
@@ -255,14 +247,12 @@ class WeiBo:
                     else:
                         msg = f"TopicName：{topic_name}\nRank：{rank}/{score}分\nMsg：{pick_res.json()['data']['add_int_msg']}"
                         self.log.append(msg)
-                        print(msg)
                         # print(msg)
                         return msg
             else:
                 msg = f'TopicName：{topic_name}\nRank：{rank}/{score}分\n' \
                       f'Message：积分少于100，暂不打榜（太少不加经验）'
                 self.log.append(msg)
-                print(msg)
                 # print(msg)
                 return msg
         else:
@@ -295,7 +285,6 @@ class WeiBo:
 超话帖子转发：已获取{task_dict["simple_repost"]}分/每日上限4分
 """
             self.log.append(msg)
-            print(msg)
             # print(msg)
             return task_dict
 
@@ -363,18 +352,11 @@ class WeiBo:
         if report_res.json()["ok"] == 1:
             # msg = f"转发微博MID：{mid} {report_res.json()['data']['created_at']} " \
             #       f"{content} 转发成功 转发后微博MID: {report_res.json()['data']['id']}"
-            msg = f"{mid} 转发成功"
-            print(msg)
             # print(msg)
             return True
-            # self.log.append(msg)
-            # return msg
         else:
             msg = f"{mid} {report_res.json()['msg']}/转发失败"
-            print(msg)
             return False
-            # self.log.append(msg)
-            # return msg
 
     def comment_story(self, mid, st, content):
         """
@@ -397,18 +379,11 @@ class WeiBo:
         comment_res = requests.post(self.comment_story_url, headers=comment_headers, data=comment_data)
         if comment_res.json()["ok"] == 1:
             # msg = f"评论微博MID：{mid} {comment_res.json()['data']['created_at']} {content} 评论成功"
-            msg = f"{mid} 评论成功"
-            print(msg)
             # print(msg)
             return True
-            # self.log.append(msg)
-            # return msg
         else:
             msg = f"{comment_res.json()['msg']}评论失败"
-            print(msg)
             return False
-            # self.log.append(msg)
-            # return msg
 
     def star_story(self, mid, st):
         """
@@ -432,16 +407,11 @@ class WeiBo:
             # msg = f"点赞微博MID：{mid} {star_response.json()['data']['created_at']} 点赞成功"
             msg = f"{mid} 点赞成功"
             print(msg)
-            # print(msg)
             return True
-            # self.log.append(msg)
-            # return msg
         else:
             msg = "点赞失败"
             print(msg)
             return False
-            # self.log.append(msg)
-            # return msg
 
     def server_push(self, sckey):
         """
