@@ -64,11 +64,8 @@ class WeiBo:
 关注数: {user["follow_count"]}
 粉丝数: {user["followers_count"]}
         """)
-<<<<<<< HEAD
         print(f"User:{user['screen_name']}")
-=======
         # print(f"User:{user['screen_name']}")
->>>>>>> 8891e54... commit
         return user_dict
 
     def get_ch_list(self):
@@ -93,14 +90,11 @@ class WeiBo:
                         "url": ch["scheme"],
                         "id": re.findall('[0-9a-z]{38}', ch["scheme"])[0]
                     }
-<<<<<<< HEAD
                     msg = '标题：{}，等级：{}级，签到状态：{}'.format(ch_dict["title"], ch_dict["level"], ch_dict["status"])
                     print(msg)
                     # self.log.append(msg)
-=======
                     # msg = '标题：{}，等级：{}级，签到状态：{}'.format(ch_dict["title"], ch_dict["level"], ch_dict["status"])
                     # print(msg)
->>>>>>> 8891e54... commit
                     ch_list.append(ch_dict)
             since_id = ch_res.json()["data"]["cardlistInfo"]["since_id"]
             if since_id == "":
@@ -165,22 +159,16 @@ class WeiBo:
         errmsg = check_res.json().get('errmsg')
         if errmsg:
             msg = f'TopicName：{ch_dict["title"]}  s参数设置有误'
-<<<<<<< HEAD
             print(msg)
-=======
             # print(msg)
->>>>>>> 8891e54... commit
             self.log.append(msg)
             return msg
 
         else:
             c_msg = check_res.json()["msg"].replace("\n", "/")
             msg = f'TopicName：{ch_dict["title"]}\nLevel：{ch_dict["level"]}\nMessage：{c_msg}'
-<<<<<<< HEAD
             print(msg)
-=======
             # print(msg)
->>>>>>> 8891e54... commit
             self.log.append(msg)
             return msg
 
@@ -205,11 +193,8 @@ class WeiBo:
         )
         if day_score_res.json()["code"] == 100000:
             msg = f'今日签到积分获取：{day_score_res.json()["data"]["add_score"]}分'
-<<<<<<< HEAD
             print(msg)
-=======
             # print(msg)
->>>>>>> 8891e54... commit
             self.log.append(msg)
             return msg
         elif day_score_res.json()["code"] == 386011:
@@ -270,21 +255,15 @@ class WeiBo:
                     else:
                         msg = f"TopicName：{topic_name}\nRank：{rank}/{score}分\nMsg：{pick_res.json()['data']['add_int_msg']}"
                         self.log.append(msg)
-<<<<<<< HEAD
                         print(msg)
-=======
                         # print(msg)
->>>>>>> 8891e54... commit
                         return msg
             else:
                 msg = f'TopicName：{topic_name}\nRank：{rank}/{score}分\n' \
                       f'Message：积分少于100，暂不打榜（太少不加经验）'
                 self.log.append(msg)
-<<<<<<< HEAD
                 print(msg)
-=======
                 # print(msg)
->>>>>>> 8891e54... commit
                 return msg
         else:
             msg = "未关注该超话，请确认并重新设置打榜超话名"
@@ -316,11 +295,8 @@ class WeiBo:
 超话帖子转发：已获取{task_dict["simple_repost"]}分/每日上限4分
 """
             self.log.append(msg)
-<<<<<<< HEAD
             print(msg)
-=======
             # print(msg)
->>>>>>> 8891e54... commit
             return task_dict
 
     def yu_yan(self, yu):
@@ -388,11 +364,8 @@ class WeiBo:
             # msg = f"转发微博MID：{mid} {report_res.json()['data']['created_at']} " \
             #       f"{content} 转发成功 转发后微博MID: {report_res.json()['data']['id']}"
             msg = f"{mid} 转发成功"
-<<<<<<< HEAD
             print(msg)
-=======
             # print(msg)
->>>>>>> 8891e54... commit
             return True
             # self.log.append(msg)
             # return msg
@@ -425,11 +398,8 @@ class WeiBo:
         if comment_res.json()["ok"] == 1:
             # msg = f"评论微博MID：{mid} {comment_res.json()['data']['created_at']} {content} 评论成功"
             msg = f"{mid} 评论成功"
-<<<<<<< HEAD
             print(msg)
-=======
             # print(msg)
->>>>>>> 8891e54... commit
             return True
             # self.log.append(msg)
             # return msg
@@ -461,11 +431,8 @@ class WeiBo:
         if star_response.json()["ok"] == 1:
             # msg = f"点赞微博MID：{mid} {star_response.json()['data']['created_at']} 点赞成功"
             msg = f"{mid} 点赞成功"
-<<<<<<< HEAD
             print(msg)
-=======
             # print(msg)
->>>>>>> 8891e54... commit
             return True
             # self.log.append(msg)
             # return msg
