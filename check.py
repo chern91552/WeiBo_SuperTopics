@@ -246,6 +246,7 @@ class WeiBo:
                         print(pick_res.json()["msg"])
                         return pick_res.json()["msg"]
                     else:
+                        print(pick_res.json())
                         msg = f"TopicName：{topic_name}\nRank：{rank}/{score}分\nMsg：{pick_res.json()['data']['add_int_msg']}"
                         self.log.append(msg)
                         # print(msg)
