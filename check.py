@@ -64,7 +64,6 @@ class WeiBo:
 关注数: {user["follow_count"]}
 粉丝数: {user["followers_count"]}
         """)
-        print(f"User:{user['screen_name']}")
         # print(f"User:{user['screen_name']}")
         return user_dict
 
@@ -411,8 +410,8 @@ class WeiBo:
         star_response = requests.post(url=self.star_story_url, headers=star_headers, data=star_data)
         if star_response.json()["ok"] == 1:
             # msg = f"点赞微博MID：{mid} {star_response.json()['data']['created_at']} 点赞成功"
-            msg = f"{mid} 点赞成功"
-            print(msg)
+            # msg = f"{mid} 点赞成功"
+            # print(msg)
             return True
         else:
             msg = "点赞失败"
@@ -470,7 +469,7 @@ class WeiBo:
     def daily_task(self, cookie, s, pick_name, sckey):
         self.set_cookie(cookies=cookie)
         ch_list = self.get_ch_list()
-        print("获取个人信息")
+        # print("获取个人信息")
         self.log.append("#### 💫‍User：")
         self.log.append("```")
         self.get_profile()
@@ -492,7 +491,7 @@ class WeiBo:
         self.log.append("```")
         self.get_score_bang([i for i in ch_list if i["title"] == pick_name])
         self.log.append("```")
-        print("喻言超话开始评论~~")
+        # print("喻言超话开始评论~~")
         self.log.append("#### ✅Post：")
         self.log.append("```")
         self.yu_yan([i["url"] for i in ch_list if i["title"] == "喻言"])
