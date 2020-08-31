@@ -244,9 +244,13 @@ class WeiBo:
                         continue
                     elif pick_res.json()["code"] == 302001:
                         print(pick_res.json()["msg"])
+                        self.log.append(pick_res.json()["msg"])
+                        return pick_res.json()["msg"]
+                    elif pick_res.json()["code"] == 382023:
+                        print(pick_res.json()["msg"])
+                        self.log.append(pick_res.json()["msg"])
                         return pick_res.json()["msg"]
                     else:
-                        print(pick_res.json())
                         msg = f"TopicName：{topic_name}\nRank：{rank}/{score}分\nMsg：{pick_res.json()['data']['add_int_msg']}"
                         self.log.append(msg)
                         # print(msg)
