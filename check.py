@@ -222,6 +222,7 @@ class WeiBo:
             # print(score_res.json())
             if score_res.json()["data"]["user_total_score"] > 100:
                 while True:
+                    time.sleep(self.seconds)
                     pick_data = {
                         "topic_name": ch_dict["title"],
                         "page_id": ch_dict["id"],
