@@ -33,7 +33,7 @@ SCKEY  # 通过https://sc.ftqq.com/3.version获取
 ##### 2、Schedule
 
 ```python
-# 由于害怕未知情况下的微博api请求异常，因此设置早上6点和晚上10点中进行两次任务
+# 由于害怕未知情况下的微博api请求异常，因此设置早上6点和晚上10点中进行两次任务，有一定延迟
 # 五位数(空格分隔)分别为分钟、小时、天、月、一个星期的第几天
 # 国际时与北京时的查询网站：http://www.timebie.com/cn/universalbeijing.php
 
@@ -68,15 +68,15 @@ def daily_task(self, cookie, s, pick_name, sckey):
     self.log.append("```")
     self.get_day_score()
     self.log.append("```")
-    print("开始打榜")
-    self.log.append("#### 💓Pick：")
-    self.log.append("```")
-    self.get_score_bang([i for i in ch_list if i["title"] == pick_name])
-    self.log.append("```")
     print("喻言超话开始评论~~")
     self.log.append("#### ✅Post：")
     self.log.append("```")
     self.yu_yan([i["url"] for i in ch_list if i["title"] == "喻言"])
+    self.log.append("```")
+    print("开始打榜")
+    self.log.append("#### 💓Pick：")
+    self.log.append("```")
+    self.get_score_bang([i for i in ch_list if i["title"] == pick_name])
     self.log.append("```")
     print("查询任务中心")
     self.log.append("#### 🌈TaskCenter：")
@@ -107,6 +107,8 @@ def daily_task(self, cookie, s, pick_name, sckey):
 
 
 ### 🏍更新记录
+
+**🎨2020/09/01：优化每日任务顺序，先完成积分任务，最后进行超话打榜**
 
 **🏳2020/08/31：增加打榜382023账户异常的判断**
 
