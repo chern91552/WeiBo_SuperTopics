@@ -314,8 +314,8 @@ class WeiBo:
             # print(msg)
             self.log.append(msg)
         else:
-            msg = f"未关注喻言，暂不评论转发点赞，因各超话评论风格不一，所以只写了喻言的，" \
-                  f"如果需要请自定义，如果仅是想获取积分则关注喻言超话即可"
+            msg = "未关注喻言，暂不评论转发点赞，因各超话评论风格不一，所以只写了喻言的，" \
+                  "如果需要请自定义，如果仅是想获取积分则关注喻言超话即可"
             # print(msg)
             self.log.append(msg)
 
@@ -360,7 +360,8 @@ class WeiBo:
             # print(msg)
             return True
         else:
-            msg = f"{mid} {report_res.json()['msg']}/转发失败"
+            # msg = f"{mid} {report_res.json()['msg']}/转发失败"
+            # print(msg)
             return False
 
     def comment_story(self, mid, st, content):
@@ -387,7 +388,8 @@ class WeiBo:
             # print(msg)
             return True
         else:
-            msg = f"{comment_res.json()['msg']}评论失败"
+            # msg = f"{comment_res.json()['msg']}评论失败"
+            # print(msg)
             return False
 
     def star_story(self, mid, st):
@@ -414,8 +416,8 @@ class WeiBo:
             # print(msg)
             return True
         else:
-            msg = "点赞失败"
-            print(msg)
+            # msg = "点赞失败"
+            # print(msg)
             return False
 
     def server_push(self, sckey):
@@ -486,17 +488,17 @@ class WeiBo:
         self.log.append("```")
         self.get_day_score()
         self.log.append("```")
-        print("开始打榜")
-        self.log.append("#### 💓Pick：")
-        self.log.append("```")
-        self.get_score_bang([i for i in ch_list if i["title"] == pick_name])
-        self.log.append("```")
         # print("喻言超话开始评论~~")
         self.log.append("#### ✅Post：")
         self.log.append("```")
         self.yu_yan([i["url"] for i in ch_list if i["title"] == "喻言"])
         self.log.append("```")
-        print("查询任务中心")
+        print("开始打榜")
+        self.log.append("#### 💓Pick：")
+        self.log.append("```")
+        self.get_score_bang([i for i in ch_list if i["title"] == pick_name])
+        self.log.append("```")
+        print("积分任务中心")
         self.log.append("#### 🌈TaskCenter：")
         self.log.append("```")
         self.task_center()
