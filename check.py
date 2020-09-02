@@ -84,18 +84,22 @@ class WeiBo:
                 if ch["card_type"] == "8":
                     ch_dict = {
                         "title": ch["title_sub"],
-                        "level": ch["desc1"][-1],
+                        "level": re.findall(r"\d+", ch["desc1"])[0],
                         "status": ch["buttons"][0]["name"],
                         "url": ch["scheme"],
                         "id": re.findall('[0-9a-z]{38}', ch["scheme"])[0]
                     }
-                    # msg = '标题：{}，等级：{}级，签到状态：{}'.format(ch_dict["title"], ch_dict["level"], ch_dict["status"])
-                    # print(msg)
-                    ch_list.append(ch_dict)
+                    if ch_dict["status"] != "关注":
+                        # msg = '标题：{}，等级：{}级，签到状态：{}'.format(ch_dict["title"], ch_dict["level"], ch_dict["status"])
+                        # print(msg)
+                        ch_list.append(ch_dict)
             since_id = ch_res.json()["data"]["cardlistInfo"]["since_id"]
             if since_id == "":
-                ch_list.sort(key=lambda x: x["level"], reverse=True)
-                return ch_list
+                ch_list.sort(key=lambda x: int(x["level"]), reverse=True)
+                if ch_list:
+                    return ch_list
+                else:
+                    self.get_ch_list()
 
     def get_story_list(self, ch_url):
         """
