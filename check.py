@@ -20,7 +20,10 @@ class WeiBo:
         self.report_story_url = "https://m.weibo.cn/api/statuses/repost"
         self.comment_story_url = "https://m.weibo.cn/api/comments/create"
         self.star_story_url = "https://m.weibo.cn/api/attitudes/create"
-        self.seconds = 5
+        self.delete_story_url = "https://m.weibo.cn/profile/delMyblog"
+        self.delete_comment_url = "https://m.weibo.cn/comments/destroy"
+        self.delete_star_url = "https://m.weibo.cn/api/attitudes/destroy"
+        self.seconds = 3
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Linux; Android 8.0; Pixel 2 Build/OPD3.170816.012) AppleWebKit/537.36 (KHTML, "
                           "like Gecko) Chrome/83.0.4103.116 Mobile Safari/537.36 ",
@@ -151,24 +154,28 @@ class WeiBo:
             'ua': "Redmi+K20+Pro+Premium+Edition_10_WeiboIntlAndroid_3610",
             "request_url": f"http%3A%2F%2Fi.huati.weibo.com%2Fmobile%2Fsuper%2Factive_checkin%3Fpageid%3D{ch_dict['id']}",
         }
-        check_res = requests.get(
-            url=self.check_url,
-            params=check_data,
-        )
-        # print(check_res.text)
-        errmsg = check_res.json().get('errmsg')
-        if errmsg:
-            msg = f'TopicName：{ch_dict["title"]}  s参数设置有误'
-            # print(msg)
-            self.log.append(msg)
-            return msg
+        if ch_dict["status"] == "签到":
+            check_res = requests.get(
+                url=self.check_url,
+                params=check_data,
+            )
+            # print(check_res.text)
+            errmsg = check_res.json().get('errmsg')
+            if errmsg:
+                msg = f'TopicName：{ch_dict["title"]}  s参数设置有误\n'
+                # print(msg)
+                self.log.append(msg)
+                return True
 
+            else:
+                c_msg = check_res.json()["msg"].replace("\n", "/")
+                msg = f'TopicName：{ch_dict["title"]}\nLevel：{ch_dict["level"]}\nMessage：{c_msg}\n'
+                # print(msg)
+                self.log.append(msg)
+                return False
         else:
-            c_msg = check_res.json()["msg"].replace("\n", "/")
-            msg = f'TopicName：{ch_dict["title"]}\nLevel：{ch_dict["level"]}\nMessage：{c_msg}'
-            # print(msg)
+            msg = f'TopicName：{ch_dict["title"]}\nLevel：{ch_dict["level"]}\nMessage：今日已签到\n'
             self.log.append(msg)
-            return msg
 
     def get_day_score(self):
         """
@@ -244,6 +251,7 @@ class WeiBo:
                     }
                     pick_res = requests.post(self.pick_url, headers=get_score_headers, data=pick_data)
                     if pick_res.json()["code"] == 402001:
+                        time.sleep(self.seconds)
                         continue
                     elif pick_res.json()["code"] == 302001:
                         print(pick_res.json()["msg"])
@@ -277,9 +285,11 @@ class WeiBo:
             "X-Requested-With": "XMLHttpRequest"
         }
         task_res = requests.get(self.task_center_url, headers=task_headers)
+        # print(task_res.json())
         if task_res.json()["code"] == 100000:
             task_dict = {
                 "total_score": task_res.json()["data"]["total_score"],
+                "al_get_score": task_res.json()["data"]["al_get_score"],
                 "day_score": task_res.json()["data"]["task_per_day"]["request"],
                 "be_comment": task_res.json()["data"]["task_per_day"]["be_comment"],
                 "lclient_day": task_res.json()["data"]["task_per_day"]["lclient_day"],
@@ -287,14 +297,15 @@ class WeiBo:
                 "simple_comment": task_res.json()["data"]["task_per_day"]["simple_comment"],
                 "simple_repost": task_res.json()["data"]["task_per_day"]["simple_repost"]
             }
-            msg = f"""当前积分：{task_dict["total_score"]}分
-每日积分：已获取{task_dict["day_score"]}分/{task_res.json()["data"]["request_desc"]}
-超话签到：已签到{task_dict["topic_check"]}次/每日上限8次
+            msg = f"""当前积分总额：{task_dict["total_score"]}分
+今日积分获取：{task_dict["al_get_score"]}分
+每日访问积分：已获取{task_dict["day_score"]}分/{task_res.json()["data"]["request_desc"]}
+超话打卡签到：已签到{task_dict["topic_check"]}次/每日上限8次
 超话帖子评论：已获取{task_dict["simple_comment"]}分/每日上限12分
 超话帖子转发：已获取{task_dict["simple_repost"]}分/每日上限4分
 """
             self.log.append(msg)
-            # print(msg)
+            print(msg)
             return task_dict
 
     def yu_yan(self, yu):
@@ -303,18 +314,34 @@ class WeiBo:
             contents = "喻言@THE9-喻言"
             report_count = 0
             comment_count = 0
-            start_count = 0
+            star_count = 0
+            delete_report = 0
+            delete_comment = 0
+            delete_star = 0
             for story in story_list:
                 time.sleep(8)
                 if story["user"] != "喻言官方反黑站":
                     st = self.get_st()
-                    if self.comment_story(story["mid"], st, contents):
+                    flag, comment_cid = self.comment_story(story["mid"], st, contents)
+                    if flag:
                         comment_count += 1
-                    if self.report_story(story["mid"], st, contents):
+                        time.sleep(self.seconds)
+                        if self.delete_comment(comment_cid, st):
+                            delete_comment += 1
+                    flag, report_mid = self.report_story(story["mid"], st, contents)
+                    if flag:
                         report_count += 1
-                    if self.star_story(story["mid"], st):
-                        start_count += 1
-            msg = f"转发成功：{report_count}条、评论成功：{comment_count}条、点赞成功：{start_count}条"
+                        time.sleep(self.seconds)
+                        if self.delete_story(report_mid, st):
+                            delete_report += 1
+                    flag, star_mid = self.star_story(story["mid"], st)
+                    if flag:
+                        star_count += 1
+                        time.sleep(self.seconds)
+                        if self.delete_star(star_mid, st):
+                            delete_star += 1
+            msg = f"转发成功：{report_count}条、评论成功：{comment_count}条、点赞成功：{star_count}条\n" \
+                  f"删除转发：{delete_report}条、删除评论：{delete_comment}条、取消点赞：{delete_star}条" \
             # print(msg)
             self.log.append(msg)
         else:
@@ -362,11 +389,11 @@ class WeiBo:
             # msg = f"转发微博MID：{mid} {report_res.json()['data']['created_at']} " \
             #       f"{content} 转发成功 转发后微博MID: {report_res.json()['data']['id']}"
             # print(msg)
-            return True
+            return True, report_res.json()['data']['id']
         else:
             # msg = f"{mid} {report_res.json()['msg']}/转发失败"
             # print(msg)
-            return False
+            return False, None
 
     def comment_story(self, mid, st, content):
         """
@@ -390,11 +417,11 @@ class WeiBo:
         if comment_res.json()["ok"] == 1:
             # msg = f"评论微博MID：{mid} {comment_res.json()['data']['created_at']} {content} 评论成功"
             # print(msg)
-            return True
+            return True, comment_res.json()['data']['id']
         else:
             # msg = f"{comment_res.json()['msg']}评论失败"
             # print(msg)
-            return False
+            return False, None
 
     def star_story(self, mid, st):
         """
@@ -418,10 +445,89 @@ class WeiBo:
             # msg = f"点赞微博MID：{mid} {star_response.json()['data']['created_at']} 点赞成功"
             # msg = f"{mid} 点赞成功"
             # print(msg)
-            return True
+            return True, mid
         else:
             # msg = "点赞失败"
             # print(msg)
+            return False, None
+
+    def delete_story(self, mid, st):
+        delete_story_data = {
+            "mid": mid,
+            "st": st,
+            "_spr": "screen:411x731"
+        }
+        delete_story_headers = {
+            "referer": f"https://m.weibo.cn/detail/{mid}"
+        }
+        delete_story_headers.update(self.headers)
+        delete_story_res = requests.post(
+            url=self.delete_story_url,
+            headers=delete_story_headers,
+            data=delete_story_data
+        )
+        if delete_story_res.json()["ok"] == 1:
+            # msg = f"{mid} 删除成功"
+            # print(msg)
+            # self.log.append(msg)
+            return True
+        else:
+            # msg = f"{mid} 删除失败"
+            # print(msg)
+            # self.log.append(msg)
+            return False
+
+    def delete_comment(self, cid, st):
+        delete_comment_data = {
+            "cid": cid,
+            "st": st,
+            "_spr": "screen:411x731"
+        }
+        delete_comment_headers = {
+            "referer": f"https://m.weibo.cn/detail/{cid}"
+        }
+        delete_comment_headers.update(self.headers)
+        delete_comment_res = requests.post(
+            url=self.delete_comment_url,
+            headers=delete_comment_headers,
+            data=delete_comment_data
+        )
+        if delete_comment_res.json()["ok"] == 1:
+            # msg = f"{cid} 删除成功"
+            # print(msg)
+            # self.log.append(msg)
+            return True
+        else:
+            # msg = f"{cid} {delete_comment_res.json()['msg']}/删除失败"
+            # print(msg)
+            # self.log.append(msg)
+            return False
+
+    def delete_star(self, mid, st):
+        delete_star_data = {
+            "id": mid,
+            "attitude": "heart",
+            "st": st,
+            "_spr": "screen:411x731"
+        }
+        delete_star_headers = {
+            "referer": f"https://m.weibo.cn/detail/{mid}"
+        }
+        delete_star_headers.update(self.headers)
+        delete_star_res = requests.post(
+            url=self.delete_star_url,
+            headers=delete_star_headers,
+            data=delete_star_data
+        )
+        if delete_star_res.json()["ok"] == 1:
+            # msg = f"{mid} 取消点赞成功"
+            # print(msg)
+            # self.log.append(msg)
+            return True
+        else:
+            # msg = f"{mid} 取消点赞失败"
+            # print(msg)
+            # self.log.append(msg)
             return False
 
     def server_push(self, sckey):
@@ -432,7 +538,7 @@ class WeiBo:
         """
         now_time = datetime.datetime.now()
         bj_time = now_time + datetime.timedelta(hours=8)
-        test_day = datetime.datetime.strptime('2020-12-19 00:00:00', '%Y-%m-%d %H:%M:%S')
+        test_day = datetime.datetime.strptime('2020-12-26 00:00:00', '%Y-%m-%d %H:%M:%S')
         date = (test_day - bj_time).days
         text = f"微博超话打卡---{bj_time.strftime('%H:%M:%S')}"
         desp = f"""
@@ -475,7 +581,7 @@ class WeiBo:
     def daily_task(self, cookie, s, pick_name, sckey):
         self.set_cookie(cookies=cookie)
         ch_list = self.get_ch_list()
-        # print("获取个人信息")
+        print("获取个人信息")
         self.log.append("#### 💫‍User：")
         self.log.append("```")
         self.get_profile()
