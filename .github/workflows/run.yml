@@ -24,9 +24,9 @@ jobs:
       run: |
         pip3 install requests      
          
-    - name: CheckIn
+    - name: DailyTask
       run: |
-        python3 check.py <<EOF
+        python3 task.py <<EOF
         ${{secrets.COOKIE}}
         ${{secrets.S}}
         ${{secrets.PICK}}

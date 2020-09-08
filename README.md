@@ -1,17 +1,17 @@
 ## 🎐WeiBo_SuperTopics
 
-> 使用教程日后有时间更新，接口写了一点，可自行扩展功能
->
 > 欢迎star✨，有问题可以提issue一起学习交流
+>
+> 每日积分获取40+积分
 
 
 
 ### 🌍功能简介
 
-- 关注超话签到
-- 每日积分获取
-- 超话打榜
-- 喻言超话帖子评论转发点赞
+- 关注超话签到 +16分+6点以后签到随机积分
+- 每日积分获取 +8分
+- 超话帖子评论转发点赞 +16分
+- 超话打榜 -∞
 - 任务中心查询积分
 - 微信推送消息
 
@@ -46,67 +46,98 @@ schedule:
 ```python
 # 有能力可以自定义自己的每日任务
 # self.log.append()是为了微信推送看上去更干净
-# 每日超话签到+每日积分获取+超话打榜+喻言超话评论+任务中心
+# 每日超话签到+每日积分获取+超话打榜+超话评论转发+任务中心
 
-def daily_task(self, cookie, s, pick_name, sckey):
-    self.set_cookie(cookies=cookie)
-    ch_list = self.get_ch_list()
+def daily_task(self, s, pick, sckey):
+    log = []
     print("获取个人信息")
-    self.log.append("#### 💫‍User：")
-    self.log.append("```")
-    self.get_profile()
-    self.log.append("```")
-    print("开始超话签到")
-    self.log.append("#### ✨CheckIn：")
-    self.log.append("```")
-    for i in ch_list:
-        time.sleep(self.seconds)
-        self.check_in(s, i)
-    self.log.append("```")
-    print("获取每日积分")
-    self.log.append("#### 🔰DailyScore：")
-    self.log.append("```")
-    self.get_day_score()
-    self.log.append("```")
-    print("喻言超话开始评论~~")
-    self.log.append("#### ✅Post：")
-    self.log.append("```")
-    self.yu_yan([i["url"] for i in ch_list if i["title"] == "喻言"])
-    self.log.append("```")
-    print("开始打榜")
-    self.log.append("#### 💓Pick：")
-    self.log.append("```")
-    self.get_score_bang([i for i in ch_list if i["title"] == pick_name])
-    self.log.append("```")
-    print("查询任务中心")
-    self.log.append("#### 🌈TaskCenter：")
-    self.log.append("```")
-    self.task_center()
-    self.log.append("```")
-    self.server_push(sckey)
+    user = self.get_profile()
+    log.append("#### 💫‍User：")
+    if user["status"]:
+        log.append("```")
+        log.append(user["user"]["user_msg"])
+        log.append("```")
+        topic_list = self.get_topic_list()
+        print("开始超话签到")
+        log.append("#### ✨CheckIn：")
+        log.append("```")
+        for topic in topic_list:
+            log.append(self.check_in(s, topic))
+        log.append("```")
+        print("获取每日积分")
+        log.append("#### 🔰DailyScore：")
+        log.append("```")
+        log.append(self.get_day_score())
+        log.append("```")
+        print("超话评论转发")
+        log.append("#### ✅Post：")
+        log.append("```")
+        log.append(self.repost_comment(topic_list[-1]))
+        log.append("```")
+        print("指定超话打榜")
+        log.append("#### 💓Pick：")
+        log.append("```")
+        log.append(self.get_score_bang([topic for topic in topic_list if topic["topic_title"] == pick]))
+        log.append("```")
+        print("积分任务中心")
+        log.append("#### 🌈TaskCenter：")
+        log.append("```")
+        log.append(self.task_center())
+        log.append("```")
+        self.server_push(sckey, "\n".join(log))
+    else:
+        log.append("```")
+        log.append(user["errmsg"])
+        log.append("```")
+        self.server_push(sckey, "\n".join(log))
 ```
 
 
 
-### 🚧使用帮助
+### 🚧使用步骤
 
-> 复杂的食用方式待更新
+1. 获取cookie
+   - Chrome登录[微博手机版](https://m.weibo.cn/)
+   - F12抓取任意请求获取cookie字段
+2. 获取s参数
+   - 有Root手机下载Httpcanary抓取微博国际版app的签到请求包
+   - 使用mumu模拟器+Fiddle或mumu模拟器+Httpcanary抓取微博国际版app的签到请求包
+3. 获取sckey
+   - 进入[Server酱](https://sc.ftqq.com/3.version)
+   - GIthub账号登陆并绑定微信获取sckey
+4. fork本仓库
+5. 设置secrets字段
+   - COOKIE
+   - S
+   - PICK
+   - SCKEY
+6. 修改README.md触发任务
 
-##### 1、cookie的获取方式
 
-##### 2、s参数的获取方式
 
-##### 3、sckey的获取方式
+### 🏝功能详情
 
-##### 4、fork本仓库
-
-##### 5、设置secrets字段
-
-##### 6、修改README.md触发任务
+1. 关注超话签到
+   - 默认降序排序，超话等级高先签到、签到过的超话将不再进行数据请求进行签到
+2. 每日积分获取
+   - 连续签到积分最高8分
+3. 超话帖子评论转发点赞
+   - 已优化积分获取，将获取关注超话列表等级最低的超话进行无痕刷分
+   - 进入关注超话等级最低的超话，转发评论所带的content都为💗
+   - 转发评论点赞完后都会进行删除微博、删除评论和取消点赞操作，因此是进行的无痕获取积分
+4. 超话打榜
+   - 通过设置的PICK在关注超话列表进行查找，如果设置的PICK未关注则不打榜
+   - 有几率会出现账号异常的检测操作，暂无法解决，可自行通过微博app进行打榜
+5. 任务中心查询积分
+   - 仅作积分展示
+6. 微信推送消息
+   - 用来查看积分获取情况
 
 
 
 ### 🏍更新记录
+
+**💗2020/09/08：增加微博评论解析、酷推等接口，更新README文档，代码重构**
 
 **🎲2020/09/04：增加删除微博、删除评论、取消点赞接口，优化喻言超话评论**
 
@@ -120,18 +151,11 @@ def daily_task(self, cookie, s, pick_name, sckey):
 
 
 
-
 ### 🚁成果图
 
+
+
 <img src="https://cdn.jsdelivr.net/gh/ReaJason/WeiBo_SuperTopics/Pictures/result.jpg" width = "500" div align=center />
-
-
-
-### 🏝Tips
-
-1. 代码完善得差不多了，关注喻言超话可自动评论转发点赞喻言超话第一页的帖子(操作完后会删除操作)
-2. 微博手机web版的cookie有效时间很长久，不像web端的登出就作废了
-3. 有能力的可自行抓微博国际版app的签到请求(手机无root推荐mumu模拟器)
 
 
 
