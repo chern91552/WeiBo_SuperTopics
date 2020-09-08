@@ -852,7 +852,7 @@ class WeiBo:
             print("超话评论转发")
             log.append("#### ✅Post：")
             log.append("```")
-            log.append(self.repost_comment(topic_list[-1]))
+            log.append(self.repost_comment(topic_list[0]))
             log.append("```")
             print("指定超话打榜")
             log.append("#### 💓Pick：")
