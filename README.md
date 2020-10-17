@@ -38,7 +38,7 @@ SCKEY  # 通过https://sc.ftqq.com/3.version获取
 # 国际时与北京时的查询网站：http://www.timebie.com/cn/universalbeijing.php
 
 schedule:
-	- cron: 0 22 * * *
+	- cron: 0 1 * * *
 ```
 
 ##### 3、DailyTask
