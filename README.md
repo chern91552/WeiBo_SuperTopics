@@ -1,7 +1,6 @@
 ## 🎐WeiBo_SuperTopics
 
 > 欢迎star✨，有问题可以提issue一起学习交流
->
 > 每日积分获取40+积分
 
 
