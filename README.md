@@ -29,6 +29,7 @@ PICK  # 设置自己打榜的超话名字,例如：喻言
 SCKEY  # 通过https://sc.ftqq.com/3.version获取
 ```
 
+
 ##### 2、Schedule
 
 ```python
