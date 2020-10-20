@@ -841,8 +841,8 @@ class WeiBo:
             print("开始超话签到")
             log.append("#### ✨CheckIn：")
             log.append("```")
-            for topic in topic_list:
-                log.append(self.check_in(s, topic))
+           # for topic in topic_list:
+            #    log.append(self.check_in(s, topic))
             log.append("```")
             print("获取每日积分")
             log.append("#### 🔰DailyScore：")
